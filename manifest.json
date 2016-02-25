@@ -1,0 +1,28 @@
+{
+	"manifest_version": 2,
+	"name": "fba commenting autmation",
+	"version": "1.00",
+	"description": "filling your explain for fba retailing",
+	"permissions":[
+		"activeTab",
+		"https://catalog-fe.amazon.com/abis/Display/*",
+		"http://catalog-fe.amazon.com/abis/Display/*"
+	],
+	"icons":{
+		"128": "images/icon128.png",
+		"64": "images/icon64.png"
+	},
+	"background": {
+		"scripts": ["background.js"]
+	},
+	"content_scripts": [{
+		"matches":[
+			"https://catalog-fe.amazon.com/abis/Display/*",
+			"http://catalog-fe.amazon.com/abis/Display/*"
+		],
+		"all_frames": true,
+		"js": ["comment.js"],
+		"run_at": "document_idle"
+	}],
+	"options_page":"option.html"
+}

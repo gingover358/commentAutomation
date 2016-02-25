@@ -1,0 +1,31 @@
+body{
+	color:#ccffcc;
+	font-family:メイリオ,arial;
+
+}
+
+#tabs {
+	display:block;
+	z-indes:1;
+}
+
+#tabs li{
+	display:inline-block;
+}
+
+#tabs > .none{
+	background: block;
+}
+
+#tabs >.activate{
+	background: white;
+
+}
+
+.container >.activate{
+	backgorund-color: #ffffcc;
+}
+
+.container >.none{
+	display:none;
+}
