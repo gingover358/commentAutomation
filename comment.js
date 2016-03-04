@@ -1,4 +1,3 @@
-console.log("comment");
 /*setting sku*/
 function rand(){
 	var alpha = "abcdefghijklmnopqrstuvwxyz";
@@ -7,7 +6,6 @@ function rand(){
 }
 
 var date = new Date();
-	console.log(date.getMonth() + 1);
 
 var random=[];
 	random[0]=rand();
@@ -16,36 +14,170 @@ var random=[];
 
 	date = date.getFullYear()+ random[0] + "/" + (date.getMonth() + 1) + random[1] + "/" + date.getDate() + random[2] + "/"; 
 
-document.getElementById("item_sku").value = date;
-
 /*addlistner*/
-var conditionForm = document.getElementById("Parent-offering_condition-span")||document.getElementById("condition_type");
-	conditionForm.addEventListener("onchange",function(){
-			var condition = conditionForm.value;
-			item.condition = condition;
-			sendMessage(item);
-	});
-console.log(conditionForm);
+var item={
+	"url":"",
+	"type":"",
+	"info":"",
+	"asin":""
+};
 
-/*default_condition*/
-function option(condition){
-	var conditionForm = document.getElementById("Parent-offering_condition-span")||document.getElementsByName("condition_type");
-	var	option = conditionForm[0].getElementsByTagName("option");
-		for(var i = option.length-1;i>=0;i--){
-			if(option[i].value==condition){
-					console.log(conditionForm)
-					console.log(option[i].value)
-				conditionForm[0].value=option[i].value;
+/*for common page*/
+if(document.getElementById("condition_type")!==null){
+	var conditionForm = document.getElementsByName("condition_type");
+	conditionForm[0].addEventListener("change",function(){
+		console.log("callback is working")
+		var condition = conditionForm[0].value;
+			item.url=document.URL;
+			item.type="sellerCentral"
+			item.info=condition;
+			item.asin=document.getElementsByClassName("reconciledDetailsAttributes");
+			item.asin=item.asin[0].textContent;
+			item.asin=item.asin.match(/\s+ASIN:\s+([[0-9]|[A-Z].*)/);
+			item.asin=item.asin[1];
+		chrome.runtime.sendMessage(item,function(response){
+			console.log(response);
+			var comment =response.comment;
+				document.getElementById("condition_note").value=comment;
+			if(response.mws){
+				var price = response.price;
+				document.getElementById("standard_price").value=price;
+				console.log("comment")
 			}else{
-				continue;
+				console.log("move to option")
+				option(condition,conditionForm,false);
 			}
-		}
-		price(mws,condition);
+		})
+	});
+/*for media page such as game,dvd etc*/
+}else{
+	console.log("start dvd &game automation")
+	var conditionForm = document.getElementById("offering_condition");
+	conditionForm.addEventListener("change",function(){
+		var condition = conditionForm.value;
+			item.url=document.URL;
+			item.type="sellerCentral"
+			item.info=condition;
+			item.asin=document.getElementById("asin_display");
+			item.asin=item.asin.textContent;
+			item.asin=item.asin.replace(/\s/,"")
+		chrome.runtime.sendMessage(item,function(response){
+			console.log(response);
+			var response = response.item;
+			if(response.mws){
+				var price = response.price;
+				var comment =response.comment;
+					document.getElementById("standard_price").value=price;
+					document.getElementById("condition_note").value=comment;
+			}else{
+				option(condition,conditionForm);
+			}
+		})
+	});
+	
 }
 
-function price(click,condition){
-	if(click){
-	/*for price info provided by exhibit page in amazon*/
+function Asin(node){
+	if(document.getElementById("asin_display")!==null){
+		item.asin=document.getElementById("asin_display");
+		item.asin=item.asin.textContent;
+		item.asin=item.asin.replace(/\s/,"");
+	}else{
+		item.asin=document.getElementsByClassName("reconciledDetailsAttributes");
+		item.asin=item.asin[0].textContent;
+		item.asin=item.asin.match(/\s+ASIN:\s+([[0-9]|[A-Z].*)/);
+		item.asin=item.asin[1];
+	}
+}
+
+function convertCondition(condition){
+	switch(condition){
+		case "New|New":
+			return "new, new"
+			break;
+		case "Used|LikeNew":
+			return "used, like_new"
+			break;
+		case "Used|VeryGood":
+			return "used, very_good"
+			break;
+		case "Used|Good":
+			return "used, good"
+			break;
+		case "Used|Acceptable":
+			return "used, acceptable"
+			break;
+	}
+}
+
+function option(condition,Form,first){
+	if(document.getElementById("condition_type")==null){
+		var conditionForm = Form;
+		var	option = conditionForm.getElementsByTagName("option");
+		for(var i = option.length-1;i>=0;i--){
+			console.log(option[i].value)
+			console.log(convertCondition(option[i].value));
+			if(convertCondition(option[i].value)==condition){
+				console.log("in")
+				conditionForm.focus();
+				setTimeout(function(){
+					conditionForm.value=option[i].value;},200);
+				conditionForm.focus();
+				break;
+			}
+		}
+		price(condition,true)
+	}else{
+		var conditionForm = document.getElementsByName("condition_type");
+		var	option = conditionForm[0].getElementsByTagName("option");
+		for(var i = option.length-1;i>=0;i--){
+			console.log(option[i].value);
+			if(option[i].value==condition){
+				conditionForm[0].value=option[i].value;
+			}
+		}
+		price(condition,false);
+	}
+	if(first){
+		item.url = document.URL;
+		item.type = "sellerCentral";
+		item.info = document.getElementById("offering_condition")||document.getElementsByName("condition_type");
+		if(document.getElementById("offering_condition")!==null){
+			var condition = document.getElementsById("offering_condition").value;
+				item.info = condition
+		}else{
+			var conditionForm = document.getElementsByName("condition_type");
+				condition = conditionForm[0].value;
+				item.info = condition;
+		}
+		item.asin = Asin(document.getElementById("offering_condition")||document.getElementsByName("condition_type"));
+		chrome.runtime.sendMessage(item,function(response){
+			console.log(response)
+			var comment =response.comment;
+				document.getElementById("condition_note").value=comment
+		})
+	}
+}
+
+function price(condition,form){
+	if(form){
+		var	price = document.getElementById("productHeaderForTabs");
+			price = document.getElementsByClassName("tiny");
+			price = price[2].textContent;
+			price = price.match(/[[0-9|,]+/g)
+		var priceForm = document.getElementById("our_price");
+			for(var i=0; price.length-1>i; i++){
+				price[i] = price[i].replace(/,/g,"")
+			}
+		if(condition="New|New"){
+			price = parseInt(price[4]) + parseInt(price[5]);
+			priceForm.value = price;
+		}else{
+			price = parseInt(price[7]) + parseInt(price[8]);
+			priceForm.value = price;
+		}
+	}else{
+		document.getElementById("item_sku").value = date;
 		if(condition=="new, new"){
 			var lowestPrice=document.getElementById("lowestPriceInfo-for-New");
 				lowestPrice.style = "display:block";
@@ -53,27 +185,15 @@ function price(click,condition){
 				button[0].style = "display:inline";
 				button[0].click();
 		}else{
+			console.log("change")
 			var lowestPrice=document.getElementById("lowestPriceInfo-for-Used");
 				lowestPrice.style = "display:block";
 			var button = lowestPrice.getElementsByTagName("button");
 				button[0].style = "display:inline";
 				button[0].click();
 		}
-
-	}else{
-	/*for mws*/
-		product=document
 	}
 }
+	
+setTimeout(option("new, new",document.getElementById("condition_type")||document.getElementById("offering_condition"),true),2000);
 
-setTimeout(option("new, new"),800);
-
-var consequence;
-
-chrome.runtime.sendMessage(consequence,function(response){
-	var item = response.item;
-	document.getElementById("comment").value=item.commnt;
-	document.getElementById("price").value = item.price;
-	consequence = true;
-	sendMessage(consequence);
-});

@@ -1,6 +1,6 @@
 /*load predefind info from back ground page*/
 var background = chrome.extension.getBackgroundPage();
-var mws = background.mws;
+var mws = background.mwsSetting;
 var comment = background.comment;
 
 	console.log(background);
@@ -33,41 +33,42 @@ function $X(exp,context){
 function callback(){
 	var button = document.getElementsByTagName('button');
 		for(var i = 0; i < button.length - 1; i++){
-			if((i % 2)==0||i==0){
+			if((i % 2)==0){
 				button[i].addEventListener("click",function(){
-					var type = button[i].parentNode;
-						type = type.getElementsByTagName("button");
-						type = type[0].value;
-						console.log(type);
-					var textarea = button[i].parentNode;
+					var type = this.parentNode;
+						type = type.getAttribute("id")
+					var textarea = this.parentNode;
 						textarea = textarea.getElementsByTagName("textarea");
-						console.log(textarea);
-						if(type == "new"|"like new"|"very good"|"good"|"acceptable"){
-							console.log("true")
-							comment.type = info;
-							alert("changeing your comment is success");
+						console.log(textarea[0].parentNode)
+						if(type == "new"||"like new"||"very good"||"good"||"acceptable"){
+							var info = {}
+								info.url = document.URL;
+								info.type = type;
+								info.info = textarea[0].parentNode.getAttribute("id");
+								info.change = true;
+								console.log(info)
 							chrome.runtime.sendMessage(info,function(){
-								var info = true; 
+								alert("changeing your comment is success");
 							});
 						}else{
-							console.log("save mws")
-							mws.type = info;
-							alert("setting your mws infomation is success");
+							var info = {}
+								info.url= document.URL;
+								info.type = type
+								info.info =	textarea[0].parentNode.getAttribute("id");
+								info.change = true
 							chrome.runtime.sendMessage(info,function(){
-								var info = true; 
+								alert("setting your mws infomation is success");
 							});
 						}
-					console.log(button[i])
 				})
 			}
 			else{
 				button[i].addEventListener("click",function(){
-					var textarea = button[i].parentNode;
-					console.log(textarea)
+					var textarea = this.parentNode;
 					var x = textarea.getElementsByTagName("textarea");
+					console.log(x[0])
 					x[0].value = "";
 				});
-				console.log(button[i]);
 			}
 		}
 }
@@ -89,8 +90,22 @@ function activation(section,list){
 	};
 };
 
+function match(elements,object){
+	var keys = Object.keys(object);
+	for(var i=0; i<=elements.length-1; i++){
+		for(var s=0; s<=keys.length-1; s++){
+			if(elements[i].getAttribute("id")==keys[s]){
+				console.log(i)
+				var textarea = elements[i].getElementsByTagName("textarea");
+					textarea[0].value=object[keys[s]]
+			}
+		}
+	}
+}
+
+
 function setting(){
-	console.log("abc")
+/* for tab selecting*/
 	var list = document.getElementById("tabs");
 	list = document.getElementsByTagName("li");
 
@@ -101,6 +116,20 @@ function setting(){
 		activation(section,this);
 		}
 	)};
+/*load setting*/
+	var info={}
+		info.type = "default";
+	chrome.runtime.sendMessage(info, function(response){
+		var mws = response.mws
+		var comment = response.comment;
+		var commentDiv = document.getElementById("comment");
+			commentDiv = commentDiv.getElementsByTagName('div')
+		var mwsDiv = document.getElementById("mws");
+			mwsDiv = mwsDiv.getElementsByTagName("div")
+		match(mwsDiv,mws);
+		match(commentDiv,comment)
+	})
+
 };
 
 window.onload = function(){

@@ -5,6 +5,7 @@
 	"description": "filling your explain for fba retailing",
 	"permissions":[
 		"activeTab",
+		"storage",
 		"https://catalog-fe.amazon.com/abis/Display/*",
 		"http://catalog-fe.amazon.com/abis/Display/*"
 	],

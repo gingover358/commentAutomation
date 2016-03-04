@@ -1,7 +1,30 @@
 body{
-	color:#ccffcc;
 	font-family:メイリオ,arial;
 
+}
+
+h1 h2 h3{
+	font-color:black;
+}
+
+li{
+	display:inline-block;
+}
+
+textarea{
+	vertical-align: middle;
+	width:400px;
+	height:75px;
+}
+
+button{
+	vertical-align: middle;
+	width:150px;
+	height:75px;
+}
+
+div{
+	display:table-cell;
 }
 
 #tabs {
@@ -23,7 +46,7 @@ body{
 }
 
 .container >.activate{
-	backgorund-color: #ffffcc;
+	backgorund-color: black;
 }
 
 .container >.none{
