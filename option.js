@@ -43,9 +43,10 @@ function callback(){
 						if(type == "new"||"like new"||"very good"||"good"||"acceptable"){
 							var info = {}
 								info.url = document.URL;
-								info.type = type;
-								info.info = textarea[0].parentNode.getAttribute("id");
+								info.type = "comment";
+								info.info = type;
 								info.change = true;
+								info.content = textarea[0].value;
 								console.log(info)
 							chrome.runtime.sendMessage(info,function(){
 								alert("changeing your comment is success");
@@ -55,7 +56,8 @@ function callback(){
 								info.url= document.URL;
 								info.type = type
 								info.info =	textarea[0].parentNode.getAttribute("id");
-								info.change = true
+								info.change = true;
+								info.content = textarea.value
 							chrome.runtime.sendMessage(info,function(){
 								alert("setting your mws infomation is success");
 							});
@@ -120,6 +122,7 @@ function setting(){
 	var info={}
 		info.type = "default";
 	chrome.runtime.sendMessage(info, function(response){
+		console.log(response)
 		var mws = response.mws
 		var comment = response.comment;
 		var commentDiv = document.getElementById("comment");

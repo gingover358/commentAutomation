@@ -63,14 +63,17 @@ if(document.getElementById("condition_type")!==null){
 			item.asin=item.asin.replace(/\s/,"")
 		chrome.runtime.sendMessage(item,function(response){
 			console.log(response);
-			var response = response.item;
+			var comment =response.comment;
+				document.getElementById("offering_condition_note").value=comment;
 			if(response.mws){
 				var price = response.price;
 				var comment =response.comment;
 					document.getElementById("standard_price").value=price;
 					document.getElementById("condition_note").value=comment;
 			}else{
-				option(condition,conditionForm);
+				var price = response.price;
+				var comment =response.comment;
+				option(condition,conditionForm,false);
 			}
 		})
 	});
@@ -112,6 +115,7 @@ function convertCondition(condition){
 
 function option(condition,Form,first){
 	if(document.getElementById("condition_type")==null){
+		console.log("not")
 		var conditionForm = Form;
 		var	option = conditionForm.getElementsByTagName("option");
 		for(var i = option.length-1;i>=0;i--){
@@ -119,14 +123,11 @@ function option(condition,Form,first){
 			console.log(convertCondition(option[i].value));
 			if(convertCondition(option[i].value)==condition){
 				console.log("in")
-				conditionForm.focus();
-				setTimeout(function(){
-					conditionForm.value=option[i].value;},200);
-				conditionForm.focus();
+				conditionForm.value=option[i].value;
 				break;
 			}
 		}
-		price(condition,true)
+		price(condition,true);
 	}else{
 		var conditionForm = document.getElementsByName("condition_type");
 		var	option = conditionForm[0].getElementsByTagName("option");
@@ -137,13 +138,12 @@ function option(condition,Form,first){
 			}
 		}
 		price(condition,false);
-	}
-	if(first){
+	}if(first){
 		item.url = document.URL;
 		item.type = "sellerCentral";
 		item.info = document.getElementById("offering_condition")||document.getElementsByName("condition_type");
 		if(document.getElementById("offering_condition")!==null){
-			var condition = document.getElementsById("offering_condition").value;
+			var condition = document.getElementById("offering_condition").value;
 				item.info = condition
 		}else{
 			var conditionForm = document.getElementsByName("condition_type");
@@ -154,27 +154,34 @@ function option(condition,Form,first){
 		chrome.runtime.sendMessage(item,function(response){
 			console.log(response)
 			var comment =response.comment;
-				document.getElementById("condition_note").value=comment
+			if(document.getElementById("condition_note")==null){
+				document.getElementById("offering_condition_note").value=comment;
+			}else{
+				document.getElementById("condition_note").value=comment;
+			}
 		})
 	}
 }
 
 function price(condition,form){
+	console.log(condition)
 	if(form){
+		document.getElementById("offering_sku").value = date;
 		var	price = document.getElementById("productHeaderForTabs");
 			price = document.getElementsByClassName("tiny");
 			price = price[2].textContent;
 			price = price.match(/[[0-9|,]+/g)
 		var priceForm = document.getElementById("our_price");
-			for(var i=0; price.length-1>i; i++){
+			for(var i=0; price.length>i; i++){
 				price[i] = price[i].replace(/,/g,"")
 			}
-		if(condition="New|New"){
+		if(condition=="new, new"){
 			price = parseInt(price[4]) + parseInt(price[5]);
 			priceForm.value = price;
 		}else{
 			price = parseInt(price[7]) + parseInt(price[8]);
 			priceForm.value = price;
+			console.log(price)
 		}
 	}else{
 		document.getElementById("item_sku").value = date;

@@ -16,13 +16,12 @@ var mwsSetting = {
 
 var MWS =JSON.stringify(mwsSetting);
 
-chrome.storage.sync.set({"explanation":""});
-
-function load(){/*if 分をなくす*/
+function load(){
 	chrome.storage.sync.get(explanation,function(matched){
+		console.log(matched)
 		if(matched!==null){
 			explanation = matched;
-			chrome.storage.sync.get(explanation,function(matched){
+			chrome.storage.sync.get(mwsSetting,function(matched){
 				mws = matched;
 				console.log("predefine")
 			})
@@ -143,7 +142,6 @@ chrome.runtime.onMessage.addListener(function(response,sender,sendResponse){
 	console.log(response)
 	var url = response.url;
 	var reg = /https:\/\/catalog-fe.amazon.com\/abis\/Display\/ItemSelected?\/*/
-	console.log(url.search(reg))
 	if(response.type == "default"){
 		console.log("defa")
 		item.mws = mwsSetting;
@@ -153,6 +151,7 @@ chrome.runtime.onMessage.addListener(function(response,sender,sendResponse){
 		switch(response.type){
 			case "mws":
 				var mws = response.info;
+				console.log(mws)
 				switch(mws){
 					case "mws mode":
 						mws.mode = response.content;
@@ -167,20 +166,35 @@ chrome.runtime.onMessage.addListener(function(response,sender,sendResponse){
 			case "comment":
 				var mws = response.info;
 				switch(mws){
-					case "new":
-						comment.new = response.content;
+					case "New":
+						explanation.New = response.content;
+						chrome.storage.sync.set(explanation,function(){
+							console.log("default explanation is set");
+						});
 						break;
-					case "like new":
-						comment.almostNew = response.content;
+					case "almostNew":
+						explanation.almostNew = response.content;
+						chrome.storage.sync.set(explanation,function(){
+							console.log("default explanation is set");
+						});
 						break;
-					case "very good":
-						comment.veryGood = response.content;
+					case "veryGood":
+						explanation.veryGood = response.content;
+						chrome.storage.sync.set(explanation,function(){
+							console.log("default explanation is set");
+						});
 						break;
 					case "good":
-						comment.good = response.content;
+						explanation.good = response.content;
+						chrome.storage.sync.set(explanation,function(){
+							console.log("default explanation is set");
+						});
 						break;
 					case "acceptable":
-						comment.acceptable = response.content;
+						explanation.acceptable = response.content;
+						chrome.storage.sync.set(explanation,function(){
+							console.log("default explanation is set");
+						});
 						break;
 				}
 			sendResponse("success");
